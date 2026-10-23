@@ -1,0 +1,8 @@
+{
+  "name": "atom8-ai-reviewer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/ai-review.test.mjs"
+  }
+}

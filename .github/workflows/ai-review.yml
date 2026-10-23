@@ -1,0 +1,63 @@
+name: AI Code Review
+
+on:
+  workflow_call:
+    secrets:
+      OPENAI_API_KEY:
+        required: true
+    inputs:
+      reviewer_ref:
+        required: false
+        type: string
+        default: v1
+      reviewer_repository:
+        required: false
+        type: string
+        default: atom8/atom8-ai-reviewer
+      review_model:
+        required: false
+        type: string
+        default: gpt-5.6-terra
+      max_diff_chars:
+        required: false
+        type: number
+        default: 120000
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out trusted reviewer code
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.reviewer_repository }}
+          ref: ${{ inputs.reviewer_ref }}
+          path: reviewer
+
+      - name: Download pull request diff
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          curl --fail --silent --show-error -L \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github.v3.diff" \
+            "https://api.github.com/repos/$REPOSITORY/pulls/$PR_NUMBER" > review.diff
+
+      - name: Run AI review
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REVIEW_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          REVIEW_DIFF_FILE: review.diff
+          REVIEWER_VERSION: ${{ inputs.reviewer_ref }}
+          REVIEW_MODEL: ${{ inputs.review_model }}
+          MAX_DIFF_CHARS: ${{ inputs.max_diff_chars }}
+        run: node reviewer/scripts/ai-review.mjs
