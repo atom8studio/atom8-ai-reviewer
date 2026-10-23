@@ -13,7 +13,7 @@ on:
       reviewer_repository:
         required: false
         type: string
-        default: atom8/atom8-ai-reviewer
+        default: atom8studio/atom8-ai-reviewer
       review_model:
         required: false
         type: string
