@@ -99,5 +99,16 @@ const review = (result.output ?? []).flatMap((item) => item.content ?? []).filte
 if (!review) throw new Error("The AI returned an empty review");
 
 await publishComment(`${commentPrefix}\n## AI Code Review\n\n${review}\n\n${metadata}`);
-if (/\b(critical|high)\b/i.test(review)) process.exitCode = 1;
+
+const criticalCount = (review.match(/🚨\s*critical/gi) ?? []).length;
+const highCount = (review.match(/🔴\s*high/gi) ?? []).length;
+
+if (criticalCount > 0 || highCount > 0) {
+  console.error(
+    `AI review completed. Blocking findings detected: ` +
+    `${highCount} high, ${criticalCount} critical.`
+  );
+  process.exitCode = 1;
+}
+
 console.log("Posted AI review to the pull request.");
