@@ -21,7 +21,7 @@ on:
       max_diff_chars:
         required: false
         type: number
-        default: 120000
+        default: 250000
 
 permissions:
   contents: read
