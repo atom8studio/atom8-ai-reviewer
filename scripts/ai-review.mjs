@@ -2,7 +2,7 @@ import fs from "node:fs";
 
 const { OPENAI_API_KEY, GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER,
   REVIEW_DIFF_FILE = "review.diff", REVIEW_COMMIT_SHA = "unknown",
-  REVIEWER_VERSION = "dev", MAX_DIFF_CHARS = "250000" } = process.env;
+  REVIEWER_VERSION = "dev", MAX_DIFF_CHARS = "120000" } = process.env;
 
 for (const [name, value] of Object.entries({ OPENAI_API_KEY, GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER })) {
   if (!value) throw new Error(`${name} is missing`);
